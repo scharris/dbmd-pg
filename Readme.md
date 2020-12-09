@@ -5,6 +5,27 @@ from a PostgreSQL database and stores the metadata to a file in json format.
 dbmd-gen-pg --conn-env <env-file>  <output-file>
 ```
 
+## Installation and usage
+To install and save as a development dependency:
+```
+npm install -D dbmd-pg
+```
+
+To run the generator, one way is to run directly from the command line via npx:
+```
+npx run gen-dbmd
+```
+
+Another option is to add an npm script to your project that will be using the
+database metadata:
+```
+# in package.json:
+"scripts": {
+  "gen-dbmd": "dbmd-gen-pg --conn-env db/connection.env dbmd.json",
+  ...
+```
+Then generate the metadata file with `npm run gen-dbmd`.
+
 ## Connection environment variables file
 The connection environment file passed to `conn-env` should define
 the following environment variables:
@@ -16,6 +37,8 @@ PGUSER=<user>
 PGPASSWORD=<password>
 PGPORT=<database-port>
 ```
+
+# Development
 
 ## Build
 To build the package:
