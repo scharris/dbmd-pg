@@ -13,7 +13,7 @@ npm install -D dbmd-pg
 
 To run the generator, one way is to run directly from the command line via npx:
 ```
-npx run gen-dbmd
+npx run dbmd-gen-pg
 ```
 
 Another option is to add an npm script to your project that will be using the
