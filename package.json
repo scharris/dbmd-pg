@@ -18,9 +18,10 @@
   "scripts": {
     "build-example-db": "docker build -t drugs-pg example/db",
     "example-db": "docker run -d --name drugs-pg --rm -p 5432:5432 --shm-size=256MB -e POSTGRES_USER=drugs -e POSTGRES_PASSWORD=drugs -e POSTGRES_DB=drugs drugs-pg",
-    "build": "tsc",
+    "build": "npm run clean && tsc",
     "preexample": "npm run build",
-    "example": "node dist/cli.js --conn-env example/db/connection.env  example/dbmd.json"
+    "example": "node dist/cli.js --conn-env example/db/connection.env  example/dbmd.json",
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "minimist": "^1.2.5"
@@ -32,6 +33,7 @@
     "fs": "^0.0.1-security",
     "path": "^0.12.7",
     "pg": "^8.5.1",
+    "rimraf": "^3.0.2",
     "typescript": "^4.0.3"
   }
 }
