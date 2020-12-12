@@ -1,0 +1,7 @@
+node_modules
+src
+__tests__
+example
+.vscode
+.editorconfig
+Readme.md

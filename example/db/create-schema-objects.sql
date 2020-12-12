@@ -17,8 +17,11 @@ create table compound
     mol_weight         numeric,
     entered            timestamp with time zone,
     entered_by         integer not null
-        constraint compound_analyst_fk
-            references analyst
+        constraint compound_enteredby_analyst_fk
+            references analyst,
+    approved_by         integer
+        constraint compound_approvedby_analyst_fk
+            references analyst  
 );
 
 create table drug
@@ -39,6 +42,8 @@ create table drug
         constraint drug_drugbankid_un
             unique,
     cid                     integer,
+    category_code varchar(1) not null,
+    descr varchar(500),
     therapeutic_indications varchar(4000),
     registered            timestamp with time zone,
     registered_by         integer not null
