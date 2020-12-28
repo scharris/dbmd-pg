@@ -11,7 +11,7 @@ async function generate
   : Promise<void>
 {
   const dbmdJson = await queryDatabaseMetadataJson();
-  
+
   await fs.writeFile(outputFile, dbmdJson, "utf-8");
 }
 
@@ -33,7 +33,7 @@ async function queryDatabaseMetadataJson(): Promise<string>
 
     return JSON.stringify(res.rows[0][keys[0]], null, 2);
   }
-  finally 
+  finally
   {
     await client.end();
   }
