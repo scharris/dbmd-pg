@@ -20,7 +20,7 @@
     "example-db": "docker run -d --name drugs-pg --rm -p 5432:5432 --shm-size=256MB -e POSTGRES_USER=drugs -e POSTGRES_PASSWORD=drugs -e POSTGRES_DB=drugs drugs-pg",
     "build": "npm run clean && tsc",
     "pregen-example-dbmd": "npm run build",
-    "gen-example-dbmd": "node lib/cli.js --conn-env example/db/connection.env  example/dbmd.json",
+    "gen-example-dbmd": "node lib/cli.js --conn-env example/db/connection.env --table-pattern '^drugs\\.' example/dbmd.json",
     "clean": "rimraf lib"
   },
   "dependencies": {

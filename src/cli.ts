@@ -1,21 +1,22 @@
 #!/usr/bin/env node
-import * as fs from 'fs/promises';
+import {promises as fs} from 'fs';
 import {Client} from 'pg';
 import * as dotenv from 'dotenv';
 import {parseAppArgs} from './args';
 
 async function generate
   (
+    tableQNamePattern: string,
     outputFile: string
   )
   : Promise<void>
 {
-  const dbmdJson = await queryDatabaseMetadataJson();
+  const dbmdJson = await queryDatabaseMetadataJson(tableQNamePattern);
 
   await fs.writeFile(outputFile, dbmdJson, "utf-8");
 }
 
-async function queryDatabaseMetadataJson(): Promise<string>
+async function queryDatabaseMetadataJson(tableQNamePattern: string): Promise<string>
 {
   const client = new Client()
 
@@ -23,7 +24,7 @@ async function queryDatabaseMetadataJson(): Promise<string>
   {
     await client.connect()
 
-    const res = await client.query(dbmdSql);
+    const res = await client.query(dbmdSql, [tableQNamePattern]);
 
     const resRow = res.rows[0];
 
@@ -79,6 +80,7 @@ relationMetadatasQuery as (
     )), '[]'::json)
   from pg_tables t
   where t.schemaname not in (select * from ignoreSchemasQuery)
+    and t.schemaname || '.' || t.tablename ~ $1
 ),
 foreignKeysQuery as (
   select coalesce(json_agg(fk.obj), '[]'::json)
@@ -125,6 +127,8 @@ foreignKeysQuery as (
       and child_fk_comp.position_in_unique_constraint = parent_pk_comp.ordinal_position
     where child_tc.constraint_type = 'FOREIGN KEY'
       and child_fk_comp.table_schema not in (select * from ignoreSchemasQuery)
+      and child_tc.table_schema || '.' || child_tc.table_name ~ $1
+      and parent_tc.table_schema || '.' || parent_tc.table_name ~ $1
     group by
       child_tc.table_schema,
       child_tc.table_name,
@@ -155,7 +159,7 @@ function printUsage(to: 'stderr' | 'stdout')
 ////////////
 
 const reqdNamedParams: string[] = [];
-const optlNamedParams = ['conn-env'];
+const optlNamedParams = ['conn-env', 'table-pattern'];
 const argsParseResult = parseAppArgs(process.argv.slice(2), reqdNamedParams, optlNamedParams, 1, 1);
 
 if ( typeof argsParseResult === 'string' )
@@ -174,12 +178,13 @@ if ( typeof argsParseResult === 'string' )
 }
 
 const envFile = argsParseResult['conn-env'];
+const includeTablesPattern: string = argsParseResult['table-pattern'] || '.*';
 const outputFile = argsParseResult._[0];
 
 if ( envFile )
   dotenv.config({ path: envFile });
 
-generate(outputFile)
+generate(includeTablesPattern, outputFile)
 .catch(err => {
   console.error(err);
   process.exit(1);
