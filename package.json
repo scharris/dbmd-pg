@@ -1,6 +1,6 @@
 {
   "name": "dbmd-pg",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Command line tool to generate database metadata for a Postgres database.",
   "author": "Stephen C. Harris",
   "license": "MIT",
