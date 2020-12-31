@@ -8,8 +8,20 @@ const dbConnectInfo = {
   password: process.env.PGPASSWORD || 'drugs'
 };
 
-test('Database metadata generation succeeds', async () => {
-  const dbmd = await queryDatabaseMetadataJson(dbConnectInfo, '.*');
-  expect(dbmd).toBeTruthy();
-  // TODO Check metadata for expected contents, e.g. table cunt, some expected fks.
+test('database metadata generation with unrestricted filter', async () => {
+  const dbmd = JSON.parse(await queryDatabaseMetadataJson(dbConnectInfo, '.*'));
+
+  expect(new Set(dbmd.relationMetadatas.map((rmd: any) => rmd.relationId.name))).toEqual(new Set([
+    'authority', 'analyst', 'compound', 'advisory_type', 'drug', 'drug_reference', 'reference',
+    'advisory', 'functional_category', 'drug_functional_category', 'brand', 'manufacturer'
+  ]));
+});
+
+test('database metadata generation with restrictive table filter', async () => {
+  const dbmd = JSON.parse(await queryDatabaseMetadataJson(dbConnectInfo, '^drugs\.(a|drug|brand)'));
+
+  expect(new Set(dbmd.relationMetadatas.map((rmd: any) => rmd.relationId.name))).toEqual(new Set([
+    'authority', 'analyst', 'advisory_type', 'drug', 'drug_reference',
+    'advisory', 'drug_functional_category', 'brand'
+  ]));
 });
