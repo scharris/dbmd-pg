@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build-example-db": "docker build -t drugs-pg example/db",
-    "example-db": "docker run -d --name drugs-pg --rm -p 5432:5432 --shm-size=256MB --env-file src/__tests__/db/server.env drugs-pg",
+    "example-db": "docker run -d --name drugs-pg --rm -p 127.0.0.1:5432:5432 --shm-size=256MB --env-file src/__tests__/db/server.env drugs-pg",
     "build": "npm run clean && tsc",
     "pregen-example-dbmd": "npm run build",
     "gen-example-dbmd": "node lib/cli.js --conn-env src/__tests__/db/client.env --table-pattern '^drugs\\.' example-dbmd.json",
