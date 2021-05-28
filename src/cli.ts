@@ -1,8 +1,7 @@
-#!/usr/bin/env node
-import * as dotenv from 'dotenv';
-import {ClientConfig} from 'pg';
-import {parseAppArgs} from './args';
-import {generate} from './dbmd-generation';
+import {config} from 'https://deno.land/x/dotenv@v1.0.1/mod.ts';
+import {ConnectionOptions} from "https://deno.land/x/postgres/mod.ts";
+import {parseAppArgs} from './args.ts';
+import {generate} from './dbmd-generation.ts';
 
 function printUsage(to: 'stderr' | 'stdout')
 {
@@ -11,15 +10,33 @@ function printUsage(to: 'stderr' | 'stdout')
   out(`Options: ${optlNamedParams.map(p => "--" + p).join(" ")}`);
 }
 
-export function getConnectInfo(): ClientConfig
+export function getConnectInfo(envObj: any): ConnectionOptions
 {
-  return {
-    host: process.env.PGHOST,
-    port: +(process.env.PGPORT || 5432),
-    database: process.env.PGDATABASE,
-    user: process.env.PGUSER,
-    password: process.env.PGPASSWORD,
-  };
+  if ( envObj )
+  {
+    const db = envObj['PGDATABASE'];
+    if ( db === undefined )
+      throw new Error('PGDATABASE definition is missing.');
+    const user = envObj['PGUSER'];
+    if ( user === undefined ) throw new Error('PGUSER definition is missing.');
+    const password = envObj['PGPASSWORD'];
+    if ( password === undefined ) throw new Error('PGPASSWORD definition is missing.');
+    return {
+      hostname: envObj['PGHOST'] || 'localhost',
+      port: +(envObj['PGPORT'] || 5432),
+      database: db,
+      user: user,
+      password: password
+    };
+  }
+  else
+    return {
+      hostname: Deno.env.get('PGHOST'),
+      port: +(Deno.env.get('PGPORT') || 5432),
+      database: Deno.env.get('PGDATABASE'),
+      user: Deno.env.get('PGUSER'),
+      password: Deno.env.get('PGPASSWORD')
+    };
 }
 
 /////////////
@@ -28,32 +45,31 @@ export function getConnectInfo(): ClientConfig
 
 const reqdNamedParams: string[] = [];
 const optlNamedParams = ['conn-env', 'table-pattern'];
-const argsParseResult = parseAppArgs(process.argv.slice(2), reqdNamedParams, optlNamedParams, 1, 1);
+const parsedArgs = parseAppArgs(reqdNamedParams, optlNamedParams, 0);
 
-if ( typeof argsParseResult === 'string' )
+if ( typeof parsedArgs === 'string' )
 {
-  if ( argsParseResult === 'help' )
+  if ( parsedArgs === 'help' )
   {
     console.log('Help requested:');
     printUsage('stdout');
-    process.exit(0);
+    Deno.exit(0);
   }
   else // error
   {
-    console.error(`Error: ${argsParseResult}`);
-    process.exit(1);
+    console.error(`Error: ${parsedArgs}`);
+    Deno.exit(1);
   }
 }
 
-const envFile = argsParseResult['conn-env'];
-const includeTablesPattern: string = argsParseResult['table-pattern'] || '.*';
-const outputFile = argsParseResult._[0];
+const envFile = parsedArgs['conn-env'];
+const includeTablesPattern: string = parsedArgs['table-pattern'] || '.*';
+const outputFile = parsedArgs._[0] as string;
 
-if ( envFile )
-  dotenv.config({ path: envFile });
+const envObj : object | null = envFile ? config({path: envFile}) : null;
 
-generate(getConnectInfo(), includeTablesPattern, outputFile)
+generate(getConnectInfo(envObj), includeTablesPattern, outputFile)
 .catch(err => {
   console.error(err);
-  process.exit(1);
+  Deno.exit(1);
 });

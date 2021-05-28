@@ -1,33 +1,32 @@
-import {promises as fs} from 'fs';
-import {Client, ClientConfig} from 'pg';
+import {Client, ConnectionOptions} from "https://deno.land/x/postgres/mod.ts";
 
 export async function generate
   (
-    dbConnectInfo: ClientConfig,
+    connectOpts: ConnectionOptions,
     tableQNamePattern: string,
     outputFile: string
   )
   : Promise<void>
 {
-  const dbmdJson = await queryDatabaseMetadataJson(dbConnectInfo, tableQNamePattern);
+  const dbmdJson = await queryDatabaseMetadataJson(connectOpts, tableQNamePattern);
 
-  await fs.writeFile(outputFile, dbmdJson, "utf-8");
+  await Deno.writeTextFile(outputFile, dbmdJson);
 }
 
 export async function queryDatabaseMetadataJson
   (
-    dbConnectInfo: ClientConfig,
+    connectOpts: ConnectionOptions,
     tableQNamePattern: string
   )
   : Promise<string>
 {
-  const client = new Client(dbConnectInfo);
+  const client = new Client(connectOpts);
 
   try
   {
     await client.connect()
 
-    const res = await client.query(dbmdSql, [tableQNamePattern]);
+    const res = await client.queryObject(dbmdSql, tableQNamePattern);
 
     const resRow = res.rows[0];
 

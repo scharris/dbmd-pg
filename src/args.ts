@@ -1,6 +1,6 @@
-import * as minimist from 'minimist';
+import * as flags from 'https://deno.land/std@0.97.0/flags/mod.ts';
 
-export function parseAppArgs
+export function parseArgs
   (
     args: string[],
     requiredNamedArgs: string[],
@@ -8,13 +8,13 @@ export function parseAppArgs
     minPositionalArgs: number,
     maxPositionalArgs: number | null = null
   )
-  : minimist.ParsedArgs | 'help' | string
+  : flags.Args | 'help' | string
 {
   if ( args.length === 1 && args[0] === '--help' )
     return 'help';
 
   let invalidParam = null;
-  const parsedArgs = minimist(args, {
+  const parsedArgs = flags.parse(args, {
     string: [...requiredNamedArgs, ...optionalNamedArgs],
     unknown: (p) => {
       if ( p.startsWith('--') ) { invalidParam = p; return false; }
@@ -38,4 +38,16 @@ export function parseAppArgs
   }
 
   return parsedArgs;
+
+}
+export function parseAppArgs
+  (
+    requiredNamedArgs: string[],
+    optionalNamedArgs: string[],
+    minPositionalArgs: number,
+    maxPositionalArgs: number | null = null
+  )
+  : flags.Args | 'help' | string
+{
+  return parseArgs(Deno.args, requiredNamedArgs, optionalNamedArgs, minPositionalArgs, maxPositionalArgs);
 }
