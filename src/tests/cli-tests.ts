@@ -1,4 +1,4 @@
-import {queryDatabaseMetadataJson} from "../dbmd-generation";
+import {queryDatabaseMetadataJson} from "../mod.ts";
 
 const dbConnectInfo = {
   host: process.env.PGHOST || 'localhost',

@@ -1,6 +1,6 @@
 import {Client, ConnectionOptions} from "https://deno.land/x/postgres/mod.ts";
 
-export async function generate
+export async function generateDatabaseMetadata
   (
     connectOpts: ConnectionOptions,
     tableQNamePattern: string,

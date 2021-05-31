@@ -1,7 +1,7 @@
 import {config} from 'https://deno.land/x/dotenv@v1.0.1/mod.ts';
 import {ConnectionOptions} from "https://deno.land/x/postgres/mod.ts";
 import {parseAppArgs} from './args.ts';
-import {generate} from './dbmd-generation.ts';
+import {generateDatabaseMetadata} from './mod.ts';
 
 function printUsage(to: 'stderr' | 'stdout')
 {
@@ -68,7 +68,7 @@ const outputFile = parsedArgs._[0] as string;
 
 const envObj : object | null = envFile ? config({path: envFile}) : null;
 
-generate(getConnectInfo(envObj), includeTablesPattern, outputFile)
+generateDatabaseMetadata(getConnectInfo(envObj), includeTablesPattern, outputFile)
 .catch(err => {
   console.error(err);
   Deno.exit(1);
