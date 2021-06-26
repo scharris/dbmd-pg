@@ -1,4 +1,4 @@
-import {Client, ConnectionOptions} from "https://deno.land/x/postgres/mod.ts";
+import {Client, ConnectionOptions} from "https://deno.land/x/postgres@v0.11.3/mod.ts";
 
 export async function generateDatabaseMetadata
   (
@@ -28,13 +28,14 @@ export async function queryDatabaseMetadataJson
 
     const res = await client.queryObject(dbmdSql, tableQNamePattern);
 
-    const resRow = res.rows[0];
+    const resRow: any = res.rows[0];
 
     const keys = Object.keys(resRow);
+
     if (keys.length !== 1)
       throw new Error(`Expected exactly one column in result, got ${keys.length} instead.`);
 
-    return JSON.stringify(res.rows[0][keys[0]], null, 2);
+    return JSON.stringify(resRow[keys[0]], null, 2);
   }
   finally
   {
